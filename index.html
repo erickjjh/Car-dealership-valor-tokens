@@ -1,52 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Car Dealership Tycoon - Valores de Carros</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f2f2f2; }
+  input[type="text"] { padding: 8px; font-size: 16px; width: 100%; margin-bottom: 10px; }
+  #results { margin-top: 10px; max-height: 70vh; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; }
+  .car { padding: 5px; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
+</style>
+</head>
+<body>
+
+<h1>Car Dealership Tycoon - Pesquisa de Carros</h1>
+<input id="search" type="text" placeholder="Digite o nome do carro..." />
+<div id="results">Carregando carros...</div>
+
 <script>
+// Lista completa de carros com valores (exemplo, você pode preencher com todos os do site)
+const cars = [
+  { name: "Corsaro 884", value: 12000 },
+  { name: "Bugatti Bolide Concept", value: 26000 },
+  { name: "Bugatti Chiron SS 300+", value: 23500 },
+  { name: "Bugatti LVN", value: 22000 },
+  { name: "Bugatti Vision GT", value: 16500 },
+  { name: "Bugatti Centodieci", value: 14000 },
+  { name: "Apollo Intensa Emozione", value: 13000 },
+  { name: "Ferrari 250 GTO", value: 12500 },
+  { name: "Porsche 919 Hybrid Evo", value: 13000 },
+  { name: "Bugatti Atlantic Concept", value: 12000 },
+  { name: "Apollo Project Evo", value: 11500 },
+  { name: "Bugatti Mistral", value: 11500 },
+  { name: "Bugatti EB110 SS", value: 11000 },
+  { name: "Ferrari FXXK Evo", value: 9500 },
+  { name: "Koenigsegg CCXR Trevita", value: 9500 },
+  { name: "Mercedes AMG Project One", value: 8500 },
+  { name: "Mercedes-Benz CLK GTR Straßenversion", value: 8500 },
+  { name: "W Motors Fenyr SuperSport", value: 8000 }
+  // ... aqui você pode continuar adicionando os carros restantes do site
+];{ name: "Fion Multiply", value: 0 },
+{ name: "Toydo Prosus", value: 0 },{ name: "Laga 2105", value: 0 },{ name: "KFN S8", value: 0 },{ name: "Mene Copper", value: 0 },{ name: "Maxma Mia", value: 0 },{ name: "Crasher 300", value: 0 },{ name: "Surburu Priza", value: 0 },{ name: "Chevion Ilapa", value: 0 },{ name: "Chevrolet", value: 0 },
+// Função para renderizar a lista
 const resultsDiv = document.getElementById("results");
 const searchInput = document.getElementById("search");
 
-let cars = [];
-
-// 🔥 PUXA TODOS OS CARROS DIRETO DA WIKI TODOS
-fetch("https://corsproxy.io/?https://car-dealership-tycoon.fandom.com/wiki/Vehicles")
-  .then(res => res.text())
-  .then(html => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-
-    // pega todos os links da lista de veículos
-    const links = doc.querySelectorAll("a");
-
-    const names = new Set();
-
-    links.forEach(link => {
-      const name = link.textContent.trim();
-      if (
-        name.length > 2 &&
-        !name.includes("Vehicles") &&
-        !name.includes("Wiki") &&
-        !name.includes("Edit")
-      ) {
-        names.add(name);
-      }
-    });
-
-    cars = Array.from(names).map(name => ({
-      name,
-      value: 0 // valor você define depois
-    }));
-
-    resultsDiv.innerHTML = `✔️ ${cars.length} carros carregados`;
+function renderCars(list) {
+  resultsDiv.innerHTML = "";
+  list.forEach(car => {
+    const div = document.createElement("div");
+    div.className = "car";
+    div.textContent = `${car.name} — ${car.value} tokens`;
+    resultsDiv.appendChild(div);
   });
+}
 
+// Mostra todos inicialmente
+renderCars(cars);
+
+// Pesquisa
 searchInput.addEventListener("input", () => {
   const q = searchInput.value.toLowerCase();
-  resultsDiv.innerHTML = "";
-
-  cars
-    .filter(c => c.name.toLowerCase().includes(q))
-    .slice(0, 50)
-    .forEach(car => {
-      const div = document.createElement("div");
-      div.textContent = `${car.name} — ${car.value} tokens`;
-      resultsDiv.appendChild(div);
-    });
+  const filtered = cars.filter(c => c.name.toLowerCase().includes(q)).slice(0, 50);
+  renderCars(filtered);
 });
-        </script>
+</script>
+
+</body>
+</html>
