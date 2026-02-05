@@ -1,95 +1,52 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Pesquisa de Valores - CDT</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background:#0f172a;
-  color:white;
-  text-align:center;
-  padding:30px;
-}
-input {
-  padding:12px;
-  width:90%;
-  max-width:420px;
-  font-size:16px;
-  border-radius:10px;
-  border:none;
-}
-.result {
-  margin-top:15px;
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-}
-.small {
-  opacity:.8;
-  font-size:14px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>🔍 Pesquisa de Valor (Tokens)</h1>
-<p>Escreve do jeito que souber — eu corrijo 😎</p>
-
-<input id="search" placeholder="Ex: bugati bale, zenvo, banana">
-
-<div id="results"></div>
-
 <script>
-// 🔥 LISTA DE CARROS (adicione TODOS aqui)
-const cars = [
-  { name: "Big Banana Car", value: 999999999 },
-  { name: "Bugatti Bolide", value: 850000000 },
-  { name: "Zenvo Aurora potencia ", value: 820000000 },
-  { name: "Red Bull RB17", value: 780000000 },
-  { name: "Aston Martin Valkyrie AMR Pro", value: 620000000 },
-  { name: "McLaren 765LT", value: 450000000 }
-];
+const resultsDiv = document.getElementById("results");
+const searchInput = document.getElementById("search");
 
-// 🔍 similaridade (corrige erro de digitação)
-function similarity(a, b) {
-  a = a.toLowerCase();
-  b = b.toLowerCase();
-  let matches = 0;
-  for (let char of a) if (b.includes(char)) matches++;
-  return matches / b.length;
-}
+let cars = [];
 
-document.getElementById("search").addEventListener("input", () => {
-  const q = search.value.trim();
-  const res = document.getElementById("results");
-  res.innerHTML = "";
-  if (!q) return;
+// 🔥 PUXA TODOS OS CARROS DIRETO DA WIKI
+fetch("https://corsproxy.io/?https://car-dealership-tycoon.fandom.com/wiki/Vehicles")
+  .then(res => res.text())
+  .then(html => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
 
-  const found = cars
-    .map(c => ({...c, score: similarity(q, c.name)}))
-    .filter(c => c.score > 0.3)
-    .sort((a,b)=>b.score-a.score);
+    // pega todos os links da lista de veículos
+    const links = doc.querySelectorAll("a");
 
-  if (!found.length) {
-    res.innerHTML = "<p>Nenhum carro encontrado</p>";
-    return;
-  }
+    const names = new Set();
 
-  found.forEach(c => {
-    const desconto = Math.floor(c.value * 0.92);
-    res.innerHTML += `
-      <div class="result">
-        🚗 <b>${c.name}</b><br>
-        💰 Valor real: ${c.value.toLocaleString()} tokens<br>
-        🔻 Valor com taxa (8%): <b>${desconto.toLocaleString()}</b><br>
-        <div class="small">Correção automática ativada</div>
-      </div>
-    `;
+    links.forEach(link => {
+      const name = link.textContent.trim();
+      if (
+        name.length > 2 &&
+        !name.includes("Vehicles") &&
+        !name.includes("Wiki") &&
+        !name.includes("Edit")
+      ) {
+        names.add(name);
+      }
+    });
+
+    cars = Array.from(names).map(name => ({
+      name,
+      value: 0 // valor você define depois
+    }));
+
+    resultsDiv.innerHTML = `✔️ ${cars.length} carros carregados`;
   });
-});
-</script>
 
-</body>
-</html>
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.toLowerCase();
+  resultsDiv.innerHTML = "";
+
+  cars
+    .filter(c => c.name.toLowerCase().includes(q))
+    .slice(0, 50)
+    .forEach(car => {
+      const div = document.createElement("div");
+      div.textContent = `${car.name} — ${car.value} tokens`;
+      resultsDiv.appendChild(div);
+    });
+});
+        </script>
