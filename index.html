@@ -1,239 +1,95 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Pesquisa de Valor - CDT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .card {
-      background: #020617;
-      padding: 24px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 12px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #22c55e;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 16px;
-      padding: 12px;
-      background: #020617;
-      border-radius: 8px;
-      border: 1px solid #1e293b;
-    }
-    .muted {
-      color: #94a3b8;
-      font-size: 13px;
-      margin-top: 6px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Pesquisa de Valores - CDT</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+  padding:30px;
+}
+input {
+  padding:12px;
+  width:90%;
+  max-width:420px;
+  font-size:16px;
+  border-radius:10px;
+  border:none;
+}
+.result {
+  margin-top:15px;
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+}
+.small {
+  opacity:.8;
+  font-size:14px;
+}
+</style>
 </head>
+
 <body>
-  <div class="card">
-    <h1>🔍 Pesquisa de Valor (CDT)</h1>
-    <input id="search" placeholder="Digite o nome do carro" />
-    <button onclick="searchCar()">Pesquisar valor</button>
-    <div id="result" class="result"></div>
-  </div>  <script>
-    const TAX = 0.08; // taxa do jogo
 
-    // Base de dados (editável)
-    const cars = {
-      "big banana car": { name: "Big Banana Car", min: null, max: null },
-      "bugatti bolide": { name: "Bugatti Bolide / Hyperluxe Balle", min: 60000, max: 100000 },
-      "zenvo aurora agil": { name: "Zenvo Aurora Agil", min: 35000, max: 55000 },
-      "red bull rb17": { name: "Red Bull RB17", min: 18000, max: 30000 },
-      "mclaren 765lt": { name: "McLaren 765LT", min: 20000, max: 40000 },
-      "aston martin valkyrie amr pro": { name: "Aston Martin Valkyrie AMR Pro", min: 10000, max: 25000 },
-      "ferrari gtc4 lusso": { name: "Ferrari GTC4 Lusso", min: 10000, max: 12000 },
-      "pagani huayra": { name: "Pagani Huayra", min: 8000, max: 14000 },
-      "bmw m2 police edition": { name: "BMW M2 Police Edition", min: 5000, max: 8000 },
-      "porsche 917k": { name: "Porsche 917K", min: 4000, max: 6000 },
-      "bugatti type 57sc": { name: "Bugatti Type 57SC Atlantic", min: 4000, max: 8000 },
-      "apollo intensa emozione": { name: "Apollo Intensa Emozione", min: 7000, max: 10000 },
-      "zenvo tsr-gt": { name: "Zenvo TSR-GT Foxzie Edition", min: 15000, max: 18000 }
-    };
+<h1>🔍 Pesquisa de Valor (Tokens)</h1>
+<p>Escreve do jeito que souber — eu corrijo 😎</p>
 
-    function withTax(value) {
-      return Math.floor(value * (1 - TAX));
-    }
+<input id="search" placeholder="Ex: bugati bale, zenvo, banana">
 
-    function searchCar() {
-      const input = document.getElementById("search").value.toLowerCase().trim();
-      const result = document.getElementById("result");
+<div id="results"></div>
 
-      if (!cars[input]) {
-        result.innerHTML = "❌ Carro não encontrado";
-        return;
-      }
+<script>
+// 🔥 LISTA DE CARROS (adicione TODOS aqui)
+const cars = [
+  { name: "Big Banana Car", value: 999999999 },
+  { name: "Bugatti Bolide", value: 850000000 },
+  { name: "Zenvo Aurora", value: 820000000 },
+  { name: "Red Bull RB17", value: 780000000 },
+  { name: "Aston Martin Valkyrie AMR Pro", value: 620000000 },
+  { name: "McLaren 765LT", value: 450000000 }
+];
 
-      const car = cars[input];
+// 🔍 similaridade (corrige erro de digitação)
+function similarity(a, b) {
+  a = a.toLowerCase();
+  b = b.toLowerCase();
+  let matches = 0;
+  for (let char of a) if (b.includes(char)) matches++;
+  return matches / b.length;
+}
 
-      if (car.min === null) {
-        result.innerHTML = `
-          🍌 <b>${car.name}</b><br>
-          Valor: <b>INESTIMÁVEL</b><br>
-          <div class="muted">Carro exclusivo / sem trade padrão</div>
-        `;
-        return;
-      }
+document.getElementById("search").addEventListener("input", () => {
+  const q = search.value.trim();
+  const res = document.getElementById("results");
+  res.innerHTML = "";
+  if (!q) return;
 
-      result.innerHTML = `
-        🚗 <b>${car.name}</b><br><br>
-        Valor bruto: ${car.min.toLocaleString()} – ${car.max.toLocaleString()} tokens<br>
-        Valor real (−8%): <b>${withTax(car.min).toLocaleString()} – ${withTax(car.max).toLocaleString()}</b> tokens
-        <div class="muted">Taxa de 8% já aplicada</div>
-      `;
-    }
-  </script></body>
-</html><!DOCTYPE html><html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Pesquisa de Valor - CDT</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .card {
-      background: #020617;
-      padding: 24px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 12px;
-      font-size: 16px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #22c55e;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 16px;
-      padding: 12px;
-      background: #020617;
-      border-radius: 8px;
-      border: 1px solid #1e293b;
-    }
-    .muted {
-      color: #94a3b8;
-      font-size: 13px;
-      margin-top: 6px;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>🔍 Pesquisa de Valor (CDT)</h1>
-    <input id="search" placeholder="Digite o nome do carro" />
-    <button onclick="searchCar()">Pesquisar valor</button>
-    <div id="result" class="result"></div>
-  </div>  <script>
-    const TAX = 0.08; // taxa do jogo
+  const found = cars
+    .map(c => ({...c, score: similarity(q, c.name)}))
+    .filter(c => c.score > 0.3)
+    .sort((a,b)=>b.score-a.score);
 
-    // Base de dados (editável)
-    const cars = {
-      "big banana car": { name: "Big Banana Car", min: null, max: null },
-      "bugatti bolide": { name: "Bugatti Bolide / Hyperluxe Balle", min: 60000, max: 100000 },
-      "zenvo aurora agil": { name: "Zenvo Aurora Agil", min: 35000, max: 55000 },
-      "red bull rb17": { name: "Red Bull RB17", min: 18000, max: 30000 },
-      "mclaren 765lt": { name: "McLaren 765LT", min: 20000, max: 40000 },
-      "aston martin valkyrie amr pro": { name: "Aston Martin Valkyrie AMR Pro", min: 10000, max: 25000 },
-      "ferrari gtc4 lusso": { name: "Ferrari GTC4 Lusso", min: 10000, max: 12000 },
-      "pagani huayra": { name: "Pagani Huayra", min: 8000, max: 14000 },
-      "bmw m2 police edition": { name: "BMW M2 Police Edition", min: 5000, max: 8000 },
-      "porsche 917k": { name: "Porsche 917K", min: 4000, max: 6000 },
-      "bugatti type 57sc": { name: "Bugatti Type 57SC Atlantic", min: 4000, max: 8000 },
-      "apollo intensa emozione": { name: "Apollo Intensa Emozione", min: 7000, max: 10000 },
-      "zenvo tsr-gt": { name: "Zenvo TSR-GT Foxzie Edition", min: 15000, max: 18000 }
-    };
+  if (!found.length) {
+    res.innerHTML = "<p>Nenhum carro encontrado</p>";
+    return;
+  }
 
-    function withTax(value) {
-      return Math.floor(value * (1 - TAX));
-    }
+  found.forEach(c => {
+    const desconto = Math.floor(c.value * 0.92);
+    res.innerHTML += `
+      <div class="result">
+        🚗 <b>${c.name}</b><br>
+        💰 Valor real: ${c.value.toLocaleString()} tokens<br>
+        🔻 Valor com taxa (8%): <b>${desconto.toLocaleString()}</b><br>
+        <div class="small">Correção automática ativada</div>
+      </div>
+    `;
+  });
+});
+</script>
 
-    function searchCar() {
-      const input = document.getElementById("search").value.toLowerCase().trim();
-      const result = document.getElementById("result");
-
-      if (!cars[input]) {
-        result.innerHTML = "❌ Carro não encontrado";
-        return;
-      }
-
-      const car = cars[input];
-
-      if (car.min === null) {
-        result.innerHTML = `
-          🍌 <b>${car.name}</b><br>
-          Valor: <b>INESTIMÁVEL</b><br>
-          <div class="muted">Carro exclusivo / sem trade padrão</div>
-        `;
-        return;
-      }
-
-      result.innerHTML = `
-        🚗 <b>${car.name}</b><br><br>
-        Valor bruto: ${car.min.toLocaleString()} – ${car.max.toLocaleString()} tokens<br>
-        Valor real (−8%): <b>${withTax(car.min).toLocaleString()} – ${withTax(car.max).toLocaleString()}</b> tokens
-        <div class="muted">Taxa de 8% já aplicada</div>
-      `;
-    }
-  </script></body>
+</body>
 </html>
